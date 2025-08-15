@@ -8,7 +8,7 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/shindoumihou/rosedb/badge)](https://www.codefactor.io/repository/github/shindoumihou/rosedb)
 ![GitHub](https://img.shields.io/github/license/ShindouMihou/RoseDB)
 
-## ❤️ What is RoseDB?
+## ❤️ What is R
 RoseDB is a simplrrre, NoSQL database that is written completely in Java containing the most basic functions that is needed for a database.
 This project was inijjjjjjtially created as a random project for me (a shower thought) but has evolved into a learning experience for me.
 
