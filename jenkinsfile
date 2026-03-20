@@ -2,67 +2,41 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_REPO   = "vijaya9494/RoseDB"
-        DOCKER_CREDENTIALS = "vijaya9494"
-        GIT_REPO           = "https://github.com/vijaya-9-afk/RoseDB.git"
-        CONTAINER_NAME     = "RoseDB"
-        APP_PORT           = "9090"
+        IMAGE_NAME = 'zomato1'
+        IMAGE_TAG  = 'v1'
+    }
+
+    tools {
+        jdk 'jdk17'
     }
 
     stages {
-        stage('Checkout') {
+        stage('Clean Workspace') {
             steps {
-                git branch: 'master', url: "${GIT_REPO}"
+                cleanWs()
+            }
+        }
+
+        stage('Git Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/vijaya-9-afk/zomato.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    sh "docker build -t ${DOCKER_HUB_REPO}:${BUILD_NUMBER} -t ${DOCKER_HUB_REPO}:latest ."
-                }
+                sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Deploy Container') {
             steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIALS}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
-                        sh "docker push ${DOCKER_HUB_REPO}:${BUILD_NUMBER}"
-                        sh "docker push ${DOCKER_HUB_REPO}:latest"
-                    }
-                }
+                sh '''
+                docker stop zomato_container || true
+                docker rm zomato_container || true
+                docker run -d -p 3006:3000 --name zomato_container ${IMAGE_NAME}:${IMAGE_TAG}
+                '''
             }
         }
-
-        stage('Deploy to Docker') {
-            steps {
-                script {
-                    // Stop and remove old container (ignore errors)
-                    sh "docker rm -f ${CONTAINER_NAME} || true"
-
-                    // Run new container
-                    sh """
-                      docker run -d --name ${CONTAINER_NAME} \
-                        -p ${APP_PORT}:${APP_PORT} \
-                        --restart unless-stopped \
-                        ${DOCKER_HUB_REPO}:latest
-                    """
-
-                    // Quick health check: container status + port open
-                    sh """
-                      sleep 5
-                      docker ps --filter "name=${CONTAINER_NAME}"
-                      # Fail if container exited
-                      if [ "\$(docker inspect -f '{{.State.Running}}' ${CONTAINER_NAME})" != "true" ]; then
-                        echo "Container is not running. Recent logs:"
-                        docker logs --tail=200 ${CONTAINER_NAME} || true
-                        exit 1
-                      fi
-                    """
-                }
-            }
-        }  
     }
 }
