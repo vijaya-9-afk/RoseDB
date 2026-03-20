@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_REPO   = "sai798187/RoseDB"
-        DOCKER_CREDENTIALS = "dockerhub-creds"
-        GIT_REPO           = "https://github.com/sai798187/RoseDB.git"
+        DOCKER_HUB_REPO   = "vijaya9494/RoseDB"
+        DOCKER_CREDENTIALS = "vijaya9494"
+        GIT_REPO           = "https://github.com/vijaya-9-afk/RoseDB.git"
         CONTAINER_NAME     = "RoseDB"
         APP_PORT           = "9090"
     }
